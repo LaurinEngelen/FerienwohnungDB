@@ -117,7 +117,11 @@ public class SuchMenu extends JFrame implements ActionListener {
 
     private String[] loadDataFromDatabase(String query) {
         ArrayList<String> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@oracle19c.in.htwg-konstanz.de:1521:ora19c", "dbsys28", "dbsys28");
+        String dbUrl = System.getenv("DB_URL");
+        String dbUser = System.getenv("DB_USER");
+        String dbPassword = System.getenv("DB_PASSWORD");
+
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -195,8 +199,7 @@ public class SuchMenu extends JFrame implements ActionListener {
 
         Double gesamtbetrag = selectedPreisProNacht * (abreiseDatum.getTime() - anreiseDatum.getTime()) / (1000 * 60 * 60 * 24);
 
-        String query = "INSERT INTO Buchung(KundenID, NameFeWo, Stornierungsdatum, Reservierungsstart, Reservierungsende, BewertungsDatum, AnzahlSterne, Rechnungsdatum, Gesamtbetrag) VALUES ( " +
-                selectedKundenID + ", '%s', NULL, TO_DATE('%s', 'YYYY-MM-DD'), TO_DATE('%s', 'YYYY-MM-DD'), NULL, NULL, NULL, %d);", selectedKundenID, selectedNameFeWo, anreiseDatumStr, abreiseDatumStr, gesamtbetrag);
+        String query = "INSERT INTO Buchung(KundenID, NameFeWo, Stornierungsdatum, Reservierungsstart, Reservierungsende, BewertungsDatum, AnzahlSterne, Rechnungsdatum, Gesamtbetrag) VALUES ( " + selectedKundenID + ", '" + selectedNameFeWo + "', NULL, TO_DATE('" + anreiseDatumStr + "', 'DD.MM.YYYY'), TO_DATE('" + abreiseDatumStr + "', 'DD.MM.YYYY'), NULL, NULL, NULL, " + gesamtbetrag + ");";
 
         loadDataFromDatabase(query);
     }
